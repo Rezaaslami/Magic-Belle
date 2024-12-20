@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی چراغانی</title>
+    <style>
+        /* CSS بازی */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff);
+            background-size: 400% 400%;
+            animation: changeColor 10s infinite;
+        }
+
+        @keyframes changeColor {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 50% 50%; }
+            50% { background-position: 100% 50%; }
+            75% { background-position: 50% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #gameArea {
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+            height: 60vh;
+            background-color: rgba(135, 206, 235, 0.9); /* نیمه‌شفاف */
+            border: 2px solid #000;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #paddle {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25%;
+            height: 10px;
+            background-color: #000;
+            border-radius: 5px;
+        }
+
+        #ball {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: red;
+        }
+
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .control-btn {
+            width: 30%;
+            padding: 10px;
+            font-size: 18px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .control-btn:active {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="paddle"></div>
+        <div id="ball"></div>
+    </div>
+
+    <!-- دکمه‌های کنترلی برای گوشی -->
+    <div id="controls">
+        <button id="leftBtn" class="control-btn">چپ</button>
+        <button id="rightBtn" class="control-btn">راست</button>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const paddle = document.getElementById('paddle');
+        const ball = document.getElementById('ball');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+
+        let paddleX = gameArea.clientWidth / 2 - paddle.offsetWidth / 2;
+        let ballX = gameArea.clientWidth / 2 - ball.offsetWidth / 2;
+        let ballY = 50;
+        let ballSpeedX = 3;
+        let ballSpeedY = 2;
+        const paddleSpeed = 20;
+
+        // حرکت پد با کیبورد
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft' && paddleX > 0) {
+                paddleX -= paddleSpeed;
+            } else if (event.key === 'ArrowRight' && paddleX < gameArea.clientWidth - paddle.offsetWidth) {
+                paddleX += paddleSpeed;
+            }
+            paddle.style.left = paddleX + 'px';
+        });
+
+        // حرکت پد با لمس دکمه‌ها
+        leftBtn.addEventListener('mousedown', () => movePaddle('left'));
+        rightBtn.addEventListener('mousedown', () => movePaddle('right'));
+function movePaddle(direction) {
+    if (direction === 'left' && paddleX > 0) {
+        paddleX -= paddleSpeed;
+    } else if (direction === 'right' && paddleX < gameArea.clientWidth - paddle.offsetWidth) {
+        paddleX += paddleSpeed;
+    }
+    paddle.style.left = paddleX + 'px';
+}
+
+// حرکت توپ
+function moveBall() {
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // برخورد توپ با دیوارها
+    if (ballX <= 0 || ballX >= gameArea.clientWidth - ball.offsetWidth) {
+        ballSpeedX = -ballSpeedX;
+    }
+    if (ballY <= 0) {
+        ballSpeedY = -ballSpeedY;
+    }
+
+    // برخورد توپ با پد
+    if (
+        ballY >= gameArea.clientHeight - paddle.offsetHeight - ball.offsetHeight &&
+        ballX >= paddleX && ballX <= paddleX + paddle.offsetWidth
+    ) {
+        ballSpeedY = -ballSpeedY;
+    }
+
+    // بررسی برخورد توپ با زمین
+    if (ballY >= gameArea.clientHeight) {
+        alert('شما بازی را باختید!');
+        ballX = gameArea.clientWidth / 2 - ball.offsetWidth / 2;
+        ballY = 50;
+        ballSpeedX = 3;
+        ballSpeedY = 2;
+    }
+
+    ball.style.left = ballX + 'px';
+    ball.style.top = ballY + 'px';
+}
+
+// حرکت توپ هر 16 میلی‌ثانیه یک بار
+setInterval(moveBall, 16);
+
+// ریسپانسیو کردن پد در هنگام تغییر اندازه صفحه
+window.addEventListener('resize', () => {
+    paddleX = Math.min(paddleX, gameArea.clientWidth - paddle.offsetWidth);
+    paddle.style.left = paddleX + 'px';
+});
+</script>
+</body>
+</html>
